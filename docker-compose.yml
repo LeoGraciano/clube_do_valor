@@ -1,0 +1,50 @@
+version: "3.3"
+
+services:
+  wordpress:
+    build: .
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_DB_NAME: wpdb
+      WORDPRESS_DEBUG: true
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG', true);
+        define('WP_DEBUG_DISPLAY', true);
+        define('WP_CLI', true);
+        define('WP_MEMORY_LIMIT', '256M');
+
+    volumes:
+      - ./src/plugins/capture-click:/var/www/html/wp-content/plugins/capture-click
+      - ./src/plugins/logs-capture-click:/var/www/html/wp-content/plugins/logs-capture-click
+      - ./src/themes/clube-do-valor:/var/www/html/wp-content/themes/clube-do-valor
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: wpdb
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db:/var/lib/mysql
+
+  adminer:
+    depends_on:
+      - db
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
+
+networks:
+  back:
+
+volumes:
+  db:
